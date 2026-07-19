@@ -33,43 +33,54 @@ const Login = ({ onSwitchToSignup }) => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 border border-pink-200">
-                <h2 className="text-3xl font-extrabold text-center text-pink-600 mb-6">Please Login to Start</h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label className="block text-lg font-semibold text-gray-700 mb-2">Email</label>
-                        <input
-                            type="email"
-                            name="userMailId"
-                            value={formData.userMailId}
-                            onChange={handleChange}
-                            placeholder="Enter your registered email"
-                            className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-400 outline-none text-gray-700 bg-gray-50"
-                            required
-                        />
+        <div className="bg-white/20 backdrop-blur-md rounded-3xl shadow-2xl p-8 md:p-10 border border-white/30">
+            <h2 className="text-3xl font-bold text-center text-white mb-2">Welcome Back</h2>
+            <p className="text-center text-white/70 text-sm mb-6">Login to your account</p>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                    <label className="block text-sm font-semibold text-white/90 mb-1">Email Address</label>
+                    <input
+                        type="email"
+                        name="userMailId"
+                        value={formData.userMailId}
+                        onChange={handleChange}
+                        placeholder="you@example.com"
+                        className="w-full px-4 py-3 border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-gray-800 bg-white/80 backdrop-blur-sm transition"
+                        required
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-white/90 mb-1">Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        className="w-full px-4 py-3 border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-gray-800 bg-white/80 backdrop-blur-sm transition"
+                        required
+                    />
+                    <div className="text-right mt-1">
+                        <Link to="/forgot-password" className="text-sm text-white/80 hover:text-white hover:underline font-medium">
+                            Forgot password?
+                        </Link>
                     </div>
-                    <div>
-                        <label className="block text-lg font-semibold text-gray-700 mb-2">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            placeholder="Enter your password"
-                            className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-400 outline-none text-gray-700 bg-gray-50"
-                            required
-                        />
-                        <div className="text-right mt-1">
-                            <Link to="/forgot-password" className="text-sm text-pink-500 hover:underline">Forgot password?</Link>
-                        </div>
-                    </div>
-                    <button type="submit" className="w-full bg-pink-500 text-black font-bold py-3 rounded-xl shadow-lg hover:bg-pink-600 transition">💖 Log in</button>
-                </form>
-                <p className="text-center text-gray-500 text-sm mt-6">
-                    Don't have an account? <button onClick={onSwitchToSignup} className="text-pink-600 font-bold hover:underline">Sign up</button>
-                </p>
-            </div>
+                </div>
+                <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-[1.02]"
+                >
+                    Login
+                </button>
+            </form>
+
+            <p className="text-center text-white/70 text-sm mt-6">
+                Don't have an account?{' '}
+                <button onClick={onSwitchToSignup} className="text-white font-bold hover:underline">
+                    Sign up
+                </button>
+            </p>
         </div>
     );
 };

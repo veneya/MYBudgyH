@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const { sendResetEmail } = require('../utils/email');
 
 const generateToken = (id) => {          
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 const registerUser = async (req, res) => {

@@ -64,7 +64,7 @@ const Sidebar = () => {
             <div className="mt-6 pt-4 border-t border-gray-300 w-4/5 text-center text-xs text-gray-500">
                 <p className="mb-1">Made with ❤️ by</p>
                 <a
-                    href="https://linkedin.com/in/veneya"
+                    href="https://www.linkedin.com/in/veneya-kharkhodi24"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-pink-500 font-semibold hover:underline inline-flex items-center gap-1"

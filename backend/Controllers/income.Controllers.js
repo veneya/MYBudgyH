@@ -1,36 +1,39 @@
 const Income = require('../models/Income.models');
 const Transaction = require('../models/Transaction.model');
 
-// Add income
+const MAX_AMOUNT = 1_000_000_000_000;
+
+// ========== ADD INCOME ==========
 const addIncome = async (req, res) => {
     const { title, amount, source, date, paymentMode, details } = req.body;
-
     try {
         if (!title || !amount || !date) {
             return res.status(400).json({ message: "Title, amount and date are required" });
+        }
+        const amountNum = parseFloat(amount);
+        if (isNaN(amountNum) || amountNum < 0 || amountNum > MAX_AMOUNT) {
+            return res.status(400).json({
+                message: `Amount must be between 0 and ${MAX_AMOUNT.toLocaleString()}`
+            });
         }
 
         const income = new Income({
             userID: req.user._id,
             title,
-            amount,
+            amount: amountNum,
             source,
             date,
             paymentMode,
             details
         });
-
         await income.save();
-
-        // also save to transaction history
         await Transaction.create({
             userID: req.user._id,
             title,
-            amount,
+            amount: amountNum,
             type: 'income',
             date
         });
-
         res.status(201).json({ message: "Income added successfully", income });
     } catch (error) {
         console.error("Error adding income:", error);
@@ -38,7 +41,7 @@ const addIncome = async (req, res) => {
     }
 };
 
-// Get all income for logged in user
+// ========== GET INCOMES ==========
 const getIncome = async (req, res) => {
     try {
         const incomes = await Income.find({ userID: req.user._id }).sort({ date: -1 });
@@ -49,26 +52,22 @@ const getIncome = async (req, res) => {
     }
 };
 
-// Delete income
+// ========== DELETE INCOME ==========
 const deleteIncome = async (req, res) => {
     try {
         const income = await Income.findOneAndDelete({
             _id: req.params.id,
             userID: req.user._id
         });
-
         if (!income) {
             return res.status(404).json({ message: "Income not found" });
         }
-
-        // remove from transactions too
         await Transaction.findOneAndDelete({
             userID: req.user._id,
             title: income.title,
             type: 'income',
             date: income.date
         });
-
         res.status(200).json({ message: "Income deleted successfully" });
     } catch (error) {
         console.error("Error deleting income:", error);
@@ -76,26 +75,31 @@ const deleteIncome = async (req, res) => {
     }
 };
 
+// ========== UPDATE INCOME ==========
 const updateIncome = async (req, res) => {
     const { title, amount, source, date, paymentMode, details } = req.body;
-
     try {
+        if (amount) {
+            const amountNum = parseFloat(amount);
+            if (isNaN(amountNum) || amountNum < 0 || amountNum > MAX_AMOUNT) {
+                return res.status(400).json({
+                    message: `Amount must be between 0 and ${MAX_AMOUNT.toLocaleString()}`
+                });
+            }
+        }
         const income = await Income.findOneAndUpdate(
             { _id: req.params.id, userID: req.user._id },
             { title, amount, source, date, paymentMode, details },
             { new: true, runValidators: true }
         );
-
         if (!income) {
             return res.status(404).json({ message: "Income not found" });
         }
-
         res.status(200).json({ message: "Income updated successfully", income });
     } catch (error) {
         console.error("Error updating income:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
-
 
 module.exports = { addIncome, getIncome, deleteIncome, updateIncome };

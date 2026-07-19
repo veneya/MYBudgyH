@@ -6,28 +6,30 @@ const Auth = () => {
     const [isLogin, setIsLogin] = useState(true);
 
     return (
-        <>
-            {/* 🎯 Brand Header – matches the app's pink theme */}
-            <div className="fixed top-0 left-0 w-full z-50 pointer-events-none mt-6">
-                <div className="text-center">
-                    <h1 className="text-5xl md:text-6xl font-extrabold text-pink-500 drop-shadow-lg tracking-tight">
+        <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+            {/* Dark overlay to improve readability */}
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-0"></div>
+
+            {/* Content – centered */}
+            <div className="relative z-10 w-full max-w-md px-4">
+                {/* Brand Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-5xl md:text-6xl font-extrabold text-white drop-shadow-lg">
                         MyBudgyH
                     </h1>
-                    <p className="text-lg md:text-xl text-pink-400/90 font-medium tracking-wider mt-1">
+                    <p className="text-lg md:text-xl text-white/80 font-light tracking-widest mt-1">
                         Your Personal Expense Tracker
                     </p>
                 </div>
-            </div>
 
-            {/* The login/signup forms – they already have margins/padding */}
-            <div className="pt-28 pb-8">
+                {/* Auth Card – Login or Signup */}
                 {isLogin ? (
                     <Login onSwitchToSignup={() => setIsLogin(false)} />
                 ) : (
                     <SignUp onSwitchToLogin={() => setIsLogin(true)} />
                 )}
             </div>
-        </>
+        </div>
     );
 };
 

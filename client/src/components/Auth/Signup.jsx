@@ -49,97 +49,74 @@ const SignUp = ({ onSwitchToLogin }) => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 border border-blue-200">
-                <h2 className="text-3xl font-extrabold text-center text-blue-600 mb-6">
-                    Create Your Account
-                </h2>
+        <div className="semi-transparent rounded-3xl shadow-2xl p-8 md:p-10 border border-white/30 backdrop-blur-sm">
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">Create Account</h2>
+            <p className="text-center text-gray-500 text-sm mb-6">Start managing your expenses</p>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label className="block text-lg font-semibold text-gray-700 mb-2" htmlFor="userName">
-                            Username
-                        </label>
-                        <input
-                            type="text"
-                            id="userName"
-                            name="userName"
-                            value={formData.userName}
-                            onChange={handleChange}
-                            placeholder="Choose a username"
-                            className="w-full px-5 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 text-gray-700 bg-gray-50"
-                            required
-                        />
-                    </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+                    <input
+                        type="text"
+                        name="userName"
+                        value={formData.userName}
+                        onChange={handleChange}
+                        placeholder="Your username"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-400 outline-none text-gray-700 bg-white/70 backdrop-blur-sm transition"
+                        required
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+                    <input
+                        type="email"
+                        name="userMailId"
+                        value={formData.userMailId}
+                        onChange={handleChange}
+                        placeholder="you@example.com"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-400 outline-none text-gray-700 bg-white/70 backdrop-blur-sm transition"
+                        required
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-400 outline-none text-gray-700 bg-white/70 backdrop-blur-sm transition"
+                        required
+                        minLength="6"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Confirm Password</label>
+                    <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-400 outline-none text-gray-700 bg-white/70 backdrop-blur-sm transition"
+                        required
+                    />
+                </div>
+                <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-pink-200/50 transition-all duration-300 transform hover:scale-[1.02]"
+                >
+                    Create Account
+                </button>
+            </form>
 
-                    <div>
-                        <label className="block text-lg font-semibold text-gray-700 mb-2" htmlFor="userMailId">
-                            Email Address
-                        </label>
-                        <input
-                            type="email"
-                            id="userMailId"
-                            name="userMailId"
-                            value={formData.userMailId}
-                            onChange={handleChange}
-                            placeholder="Enter your email"
-                            className="w-full px-5 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 text-gray-700 bg-gray-50"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-lg font-semibold text-gray-700 mb-2" htmlFor="password">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            placeholder="Create a password"
-                            className="w-full px-5 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 text-gray-700 bg-gray-50"
-                            required
-                            minLength="6"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-lg font-semibold text-gray-700 mb-2" htmlFor="confirmPassword">
-                            Confirm Password
-                        </label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            placeholder="Confirm your password"
-                            className="w-full px-5 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 text-gray-700 bg-gray-50"
-                            required
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 text-black font-bold py-3 rounded-xl shadow-lg hover:bg-blue-600 transition-all duration-200 ease-in-out focus:ring-4 focus:ring-blue-300 focus:ring-offset-2"
-                    >
-                        ✨ Sign Up
-                    </button>
-                </form>
-
-                <p className="text-center text-gray-500 text-sm mt-6">
-                    Already have an account?{' '}
-                    <button
-                        type="button"
-                        onClick={onSwitchToLogin}
-                        className="text-blue-600 font-bold hover:underline"
-                    >
-                        Log in
-                    </button>
-                </p>
-            </div>
+            <p className="text-center text-gray-500 text-sm mt-6">
+                Already have an account?{' '}
+                <button onClick={onSwitchToLogin} className="text-pink-600 font-bold hover:underline">
+                    Log in
+                </button>
+            </p>
         </div>
     );
 };

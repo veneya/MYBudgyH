@@ -2,7 +2,7 @@ const Budget = require('../models/Budget.models');
 
 // Add budget
 const addBudget = async (req, res) => {
-    const { category, limit } = req.body;
+    const { category, limit, spent } = req.body;  
 
     try {
         if (!category || !limit) {
@@ -13,7 +13,7 @@ const addBudget = async (req, res) => {
             userID: req.user._id,
             category,
             limit,
-            spent: 0
+            spent: spent || 0  
         });
 
         await budget.save();
@@ -76,4 +76,25 @@ const deleteBudget = async (req, res) => {
     }
 };
 
-module.exports = { addBudget, getBudgets, updateBudgetSpent, deleteBudget };
+const updateBudget = async (req, res) => {
+    const { category, limit, spent } = req.body;
+
+    try {
+        const budget = await Budget.findOneAndUpdate(
+            { _id: req.params.id, userID: req.user._id },
+            { category, limit, spent },
+            { new: true, runValidators: true }
+        );
+
+        if (!budget) {
+            return res.status(404).json({ message: "Budget not found" });
+        }
+
+        res.status(200).json({ message: "Budget updated successfully", budget });
+    } catch (error) {
+        console.error("Error updating budget:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+module.exports = { addBudget, getBudgets, updateBudgetSpent, deleteBudget, updateBudget };

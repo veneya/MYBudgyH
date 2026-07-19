@@ -4,7 +4,6 @@ import SignUp from './Signup';
 
 const Auth = () => {
     const [isLogin, setIsLogin] = useState(true);
-
     return (
         <>
             {isLogin ? (

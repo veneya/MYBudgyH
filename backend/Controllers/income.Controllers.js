@@ -76,4 +76,26 @@ const deleteIncome = async (req, res) => {
     }
 };
 
-module.exports = { addIncome, getIncome, deleteIncome };
+const updateIncome = async (req, res) => {
+    const { title, amount, source, date, paymentMode, details } = req.body;
+
+    try {
+        const income = await Income.findOneAndUpdate(
+            { _id: req.params.id, userID: req.user._id },
+            { title, amount, source, date, paymentMode, details },
+            { new: true, runValidators: true }
+        );
+
+        if (!income) {
+            return res.status(404).json({ message: "Income not found" });
+        }
+
+        res.status(200).json({ message: "Income updated successfully", income });
+    } catch (error) {
+        console.error("Error updating income:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+
+module.exports = { addIncome, getIncome, deleteIncome, updateIncome };

@@ -3,11 +3,7 @@ import axios from "axios";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 const axiosInstance = axios.create({
-<<<<<<< HEAD
     baseURL: API_URL,
-=======
-    baseURL: "https://mybudgyh.onrender.com",  // for local development
->>>>>>> 760ddff91b74a4d2853857fd833e5a321e8e4abc
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",

@@ -11,7 +11,7 @@ const ForgotPassword = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await axiosInstance.post('/auth/forgot-password', { userMailId: email}, { timeout: 120000 });
+            await axiosInstance.post('/auth/forgot-password', { userMailId: email}, { timeout: 300000 });
             toast.success('Reset link sent to your email! Check your inbox.');
             setEmail('');
         } catch (err) {

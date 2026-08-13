@@ -35,10 +35,7 @@ const addExpense = async (req, res) => {
 
         // Auto-update budget spent
         if (category) {
-            const budget = await Budget.findOne({
-                userID: req.user._id,
-                category: category
-            });
+            const budget = await findBudgetByCategory(req.user._id, category);
             if (budget) {
                 const currentSpent = parseFloat(budget.spent) || 0;
                 budget.spent = currentSpent + amountNum;
@@ -88,6 +85,21 @@ const deleteExpense = async (req, res) => {
             type: 'expense',
             date: expense.date
         });
+        // Reduce the budget spent for the expense's category
+        if (expense.category) {
+            const budget = await Budget.findOne({
+                userID: req.user._id,
+                category: new RegExp(`^${String(expense.category).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i')
+            });
+            if (budget) {
+                const currentSpent = parseFloat(budget.spent) || 0;
+                const expenseAmount = typeof expense.amount === 'object' && expense.amount.$numberDecimal
+                    ? parseFloat(expense.amount.$numberDecimal)
+                    : Number(expense.amount);
+                budget.spent = Math.max(currentSpent - expenseAmount, 0);
+                await budget.save();
+            }
+        }
         res.status(200).json({ message: "Expense deleted successfully" });
     } catch (error) {
         console.error("Error deleting expense:", error);
@@ -122,17 +134,35 @@ const getMonthlyTrend = async (req, res) => {
 };
 
 // ========== UPDATE EXPENSE ==========
+const findBudgetByCategory = (userID, category) => {
+    return Budget.findOne({
+        userID,
+        category: new RegExp(`^${String(category).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i')
+    });
+};
+
 const updateExpense = async (req, res) => {
     const { title, amount, category, date, paymentMode, details } = req.body;
     try {
-        if (amount) {
-            const amountNum = parseFloat(amount);
+        let amountNum = null;
+        if (amount !== undefined && amount !== null && amount !== '') {
+            amountNum = parseFloat(amount);
             if (isNaN(amountNum) || amountNum < 0 || amountNum > MAX_AMOUNT) {
                 return res.status(400).json({
                     message: `Amount must be between 0 and ${MAX_AMOUNT.toLocaleString()}`
                 });
             }
         }
+        const existing = await Expenses.findOne({ _id: req.params.id, userID: req.user._id });
+        if (!existing) {
+            return res.status(404).json({ message: "Expense not found" });
+        }
+
+        const oldCategory = existing.category;
+        const oldAmount = typeof existing.amount === 'object' && existing.amount.$numberDecimal
+            ? parseFloat(existing.amount.$numberDecimal)
+            : Number(existing.amount);
+
         const expense = await Expenses.findOneAndUpdate(
             { _id: req.params.id, userID: req.user._id },
             { title, amount, category, date, paymentMode, details },
@@ -141,10 +171,31 @@ const updateExpense = async (req, res) => {
         if (!expense) {
             return res.status(404).json({ message: "Expense not found" });
         }
+        const newAmount = amountNum !== null ? amountNum : oldAmount;
+
+        // Update the matching transaction using the OLD title/date values
         await Transaction.findOneAndUpdate(
-            { userID: req.user._id, title: expense.title, type: 'expense', date: expense.date },
-            { title, amount, date }
+            { userID: req.user._id, title: existing.title, type: 'expense', date: existing.date },
+            { title: title || existing.title, amount: newAmount, date: date || existing.date }
         );
+
+        // Adjust budget spent: remove old category contribution, add new one
+        const newCategory = category || oldCategory;
+        const oldBudget = await findBudgetByCategory(req.user._id, oldCategory);
+        if (oldBudget) {
+            const currentSpent = parseFloat(oldBudget.spent) || 0;
+            oldBudget.spent = Math.max(currentSpent - oldAmount, 0);
+            await oldBudget.save();
+        }
+        if (newCategory) {
+            const newBudget = await findBudgetByCategory(req.user._id, newCategory);
+            if (newBudget) {
+                const currentSpent = parseFloat(newBudget.spent) || 0;
+                newBudget.spent = currentSpent + newAmount;
+                await newBudget.save();
+            }
+        }
+
         res.status(200).json({ message: "Expense updated successfully", expense });
     } catch (error) {
         console.error("Error updating expense:", error);

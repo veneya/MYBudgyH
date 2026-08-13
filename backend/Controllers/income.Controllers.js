@@ -79,14 +79,20 @@ const deleteIncome = async (req, res) => {
 const updateIncome = async (req, res) => {
     const { title, amount, source, date, paymentMode, details } = req.body;
     try {
-        if (amount) {
-            const amountNum = parseFloat(amount);
+        let amountNum = null;
+        if (amount !== undefined && amount !== null && amount !== '') {
+            amountNum = parseFloat(amount);
             if (isNaN(amountNum) || amountNum < 0 || amountNum > MAX_AMOUNT) {
                 return res.status(400).json({
                     message: `Amount must be between 0 and ${MAX_AMOUNT.toLocaleString()}`
                 });
             }
         }
+        const existing = await Income.findOne({ _id: req.params.id, userID: req.user._id });
+        if (!existing) {
+            return res.status(404).json({ message: "Income not found" });
+        }
+
         const income = await Income.findOneAndUpdate(
             { _id: req.params.id, userID: req.user._id },
             { title, amount, source, date, paymentMode, details },
@@ -95,6 +101,14 @@ const updateIncome = async (req, res) => {
         if (!income) {
             return res.status(404).json({ message: "Income not found" });
         }
+        const newAmount = amountNum !== null ? amountNum : Number(existing.amount);
+
+        // Update the matching transaction using the OLD title/date values
+        await Transaction.findOneAndUpdate(
+            { userID: req.user._id, title: existing.title, type: 'income', date: existing.date },
+            { title: title || existing.title, amount: newAmount, date: date || existing.date }
+        );
+
         res.status(200).json({ message: "Income updated successfully", income });
     } catch (error) {
         console.error("Error updating income:", error);

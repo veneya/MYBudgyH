@@ -22,6 +22,14 @@ const addBudget = async (req, res) => {
             });
         }
 
+        const existingBudget = await Budget.findOne({
+            userID: req.user._id,
+            category: new RegExp(`^${String(category).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i')
+        });
+        if (existingBudget) {
+            return res.status(400).json({ message: `Budget for ${category} already exists` });
+        }
+
         const budget = new Budget({
             userID: req.user._id,
             category,
@@ -31,6 +39,9 @@ const addBudget = async (req, res) => {
         await budget.save();
         res.status(201).json({ message: "Budget added successfully", budget });
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ message: "Budget already exists for this category" });
+        }
         console.error("Error adding budget:", error);
         res.status(500).json({ message: "Server error" });
     }
@@ -93,7 +104,7 @@ const deleteBudget = async (req, res) => {
 const updateBudget = async (req, res) => {
     const { category, limit, spent } = req.body;
     try {
-        if (limit) {
+        if (limit !== undefined && limit !== null && limit !== '') {
             const limitNum = parseFloat(limit);
             if (isNaN(limitNum) || limitNum < 0 || limitNum > MAX_AMOUNT) {
                 return res.status(400).json({
@@ -101,12 +112,23 @@ const updateBudget = async (req, res) => {
                 });
             }
         }
-        if (spent) {
+        const hasSpent = spent !== undefined && spent !== null && spent !== '';
+        if (hasSpent) {
             const spentNum = parseFloat(spent);
             if (isNaN(spentNum) || spentNum < 0 || spentNum > MAX_AMOUNT) {
                 return res.status(400).json({
                     message: `Spent must be between 0 and ${MAX_AMOUNT.toLocaleString()}`
                 });
+            }
+        }
+        if (category) {
+            const existingBudget = await Budget.findOne({
+                userID: req.user._id,
+                category: new RegExp(`^${String(category).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i'),
+                _id: { $ne: req.params.id }
+            });
+            if (existingBudget) {
+                return res.status(400).json({ message: `Budget for ${category} already exists` });
             }
         }
         const budget = await Budget.findOneAndUpdate(

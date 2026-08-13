@@ -211,12 +211,11 @@ const Income = () => {
                   name="amount"
                   type="number"
                   max="999999999999"
-                  min="1"
+                  min="0"
                   value={formData.amount}
                   onChange={handleChange}
                   placeholder="0"
                   required
-                  min="0"
                   className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-300 outline-none text-gray-700 bg-gray-50"
                 />
               </div>

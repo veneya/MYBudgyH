@@ -9,19 +9,22 @@ const generateToken = (id) => {
 };
 
 const registerUser = async (req, res) => {
-    console.log("📥 Register attempt with body:", req.body); // ✅ log request
-
     const { userName, userMailId, password, profileImage } = req.body;
 
     try {
-        console.log("🔍 Checking if user exists...");
-        const userExist = await User.findOne({ userMailId });
-        if (userExist) {
-            console.log("❌ User already exists");
-            return res.status(400).json({ message: "User already exists" });
+        const existing = await User.findOne({
+            $or: [
+                { userMailId: userMailId.toLowerCase() },
+                { userName: userName.toLowerCase() }
+            ]
+        });
+        if (existing) {
+            const message = existing.userMailId === userMailId.toLowerCase()
+                ? "User already exists"
+                : "Username already taken";
+            return res.status(400).json({ message });
         }
 
-        console.log("✅ Creating new user...");
         const newUser = new User({
             userName,
             userMailId,
@@ -29,9 +32,7 @@ const registerUser = async (req, res) => {
             profileImage
         });
 
-        console.log("💾 Saving user to DB...");
         await newUser.save();
-        console.log("✅ User saved successfully!");
 
         res.status(201).json({
             message: "User created successfully",
@@ -44,11 +45,14 @@ const registerUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ ERROR in registerUser:", error); // ✅ more detailed log
-        console.error("❌ Error stack:", error.stack);     // ✅ stack trace
-        res.status(500).json({ 
+        // Handle duplicate key errors (race conditions) gracefully
+        if (error.code === 11000) {
+            return res.status(400).json({ message: "User already exists" });
+        }
+        console.error("❌ ERROR in registerUser:", error);
+        res.status(500).json({
             message: "Not able to register the user",
-            error: error.message  // ✅ include error in response
+            error: error.message
         });
     }
 };
@@ -104,19 +108,22 @@ const getUser = async (req, res) => {
 };
 
 const forgotPassword = async (req, res) => {
-    const { userMailId } = req.body;
-    const user = await User.findOne({ userMailId });
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    try {
+        const user = await User.findOne({ userMailId: req.body.userMailId.toLowerCase() });
+        if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const token = crypto.randomBytes(20).toString('hex');
-    user.resetPasswordToken = token;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-    await user.save();
+        const token = crypto.randomBytes(20).toString('hex');
+        const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
+        await sendResetEmail(user.userMailId, resetLink);
 
-    const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
-    await sendResetEmail(user.userMailId, resetLink);
-
-    res.json({ message: 'Reset link sent to email' });
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000;
+        await user.save();
+        res.json({ message: 'Reset link sent to email' });
+    } catch (error) {
+        console.error('Password-reset email failed:', error.message);
+        res.status(502).json({ message: 'Unable to send reset email. Check the mail server configuration.' });
+    }
 };
 
 // Reset password
